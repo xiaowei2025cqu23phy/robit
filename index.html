@@ -1,0 +1,129 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DeepSeek 代码助手</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
+    <style>
+        body {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        #chat-container {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            min-height: 400px;
+        }
+        .message {
+            margin: 15px 0;
+            padding: 10px;
+            border-radius: 6px;
+        }
+        .user-message {
+            background: #f8f9fa;
+        }
+        .assistant-message pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+        #input-box {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 8px 16px;
+            background: #2c3e50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>DeepSeek 代码助手</h1>
+    
+    <div id="chat-container"></div>
+    
+    <div>
+        <input type="text" id="input-box" placeholder="输入代码问题...">
+        <button onclick="sendQuery()">发送</button>
+        <button onclick="exportReport('html')">导出HTML</button>
+        <button onclick="exportReport('md')">导出MD</button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <script>
+        let sessionId = Date.now().toString();
+        
+        function appendMessage(role, content) {
+            const container = document.getElementById('chat-container');
+            const formatted = role === 'assistant' 
+                ? content.replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
+                : content;
+            
+            const message = document.createElement('div');
+            message.className = `message ${role}-message`;
+            message.innerHTML = `
+                <strong>${role === 'user' ? '用户' : '助手'}:</strong>
+                <div>${formatted}</div>
+            `;
+            container.appendChild(message);
+            hljs.highlightAll();
+            container.scrollTop = container.scrollHeight;
+        }
+
+        async function sendQuery() {
+            const input = document.getElementById('input-box');
+            const query = input.value.trim();
+            if (!query) return;
+            
+            input.value = '';
+            appendMessage('user', query);
+            
+            try {
+                const response = await fetch('/ask', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        session_id: sessionId,
+                        query: query
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.error) throw data.error;
+                
+                appendMessage('assistant', data.reply);
+            } catch (error) {
+                appendMessage('assistant', `错误: ${error}`);
+            }
+        }
+
+        async function exportReport(format) {
+            try {
+                const response = await fetch(`/export/${format}/${sessionId}`);
+                const data = await response.text();
+                
+                const blob = new Blob([data], {type: 'text/plain'});
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `report_${sessionId}.${format}`;
+                a.click();
+            } catch (error) {
+                alert('导出失败: ' + error);
+            }
+        }
+    </script>
+</body>
+</html>
