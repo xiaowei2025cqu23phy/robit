@@ -1,0 +1,83 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+
+# 虚拟环境
+venv/
+env/
+ENV/
+
+# IDE & AI
+.vscode/
+.idea/
+.claude/
+*.swp
+*.swo
+*~
+
+# 环境变量 & 密钥
+.env
+.env.*
+!.env.example
+
+# 自定义提示词（含个人偏好，不提交；默认模板 default.txt/real.txt 提交）
+core/prompts/custom.txt
+core/prompts/real_custom.txt
+
+# 真人代理收到的文件
+agent/inbox/
+
+# 日志 & 运行时数据
+*.log
+*.log.*
+botpy.log*
+logs/
+chat_logs/
+chat_log.json
+*.session
+*.sqlite
+*.db
+
+# LLBot（独立 exe 模块，体积大）
+llbot/
+
+# 凭据
+*credentials*
+*secret*
+*_secret*
+*.pem
+*.key
+
+# 系统
+.DS_Store
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# 技术文档（含密钥，不提交）
+技术文档.md
+
+# 压缩包
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# 真人QQ 模式（本地玩法，不入库；含逆向协议风险）
+agent/
